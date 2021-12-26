@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.zxw">
 
     <uses-permission android:name="android.permission.BLUETOOTH"/>
@@ -13,24 +14,29 @@
     <uses-feature android:name="android.hardware.location.gps" />
 
     <application
-        android:allowBackup="true"
+        android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_foreground"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".ui.Ble_Activity"></activity>
-        <service android:name="com.zxw.service.BluetoothLeService" android:enabled="true"></service>
+
+        <activity android:name=".ui.Ble_Activity" />
+
+        <service
+            android:name="com.zxw.service.BluetoothLeService"
+            android:enabled="true" />
+
         <activity android:name=".ui.DebugActivity"
-            android:resizeableActivity="true"/>
+            android:resizeableActivity="true"
+            tools:targetApi="n" />
     </application>
 
 </manifest>
