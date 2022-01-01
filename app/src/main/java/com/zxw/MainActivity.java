@@ -1,6 +1,7 @@
 package com.zxw;
 
 import android.Manifest;
+import android.animation.Animator;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -11,6 +12,7 @@ import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanResult;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
@@ -21,23 +23,29 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.zxw.toolkit.BluetoothMessage;
 import com.zxw.toolkit.ParseLeAdvData;
+import com.zxw.toolkit.UIHandler;
 import com.zxw.ui.BasActivity;
 import com.zxw.ui.Ble_Activity;
 import com.zxw.ui.DebugActivity;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+
+import static android.content.pm.PackageManager.PERMISSION_DENIED;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 /**
  * @author
@@ -46,6 +54,10 @@ import java.util.ArrayList;
  * @version:
  */
 public class MainActivity extends BasActivity implements OnClickListener {
+
+    private static final int MY_PERMISSIONS_REQUEST_LOCATION_ACCESS = 1000;
+
+    private long mCreateTime;
 
     // 扫描蓝牙按钮
     private Button scan_btn;
@@ -82,19 +94,27 @@ public class MainActivity extends BasActivity implements OnClickListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //申请位置权限
-        initPermissions();
+        mCreateTime = System.currentTimeMillis();
 
         // 初始化控件
         init();
 
-        // 初始化蓝牙
-        init_ble();
+        // 申请位置权限
+        initPermissions();
+    }
 
-        // 设置回调
-        setScanCallBack();
 
-        scan_flag = true;
+    /**
+     * @param
+     * @return void
+     * @throws
+     * @Title: init
+     * @Description: TODO(初始化UI控件)
+     */
+    private void init() {
+        scan_btn = findViewById(R.id.scan_dev_btn);
+        scan_btn.setOnClickListener(this);
+        listView = findViewById(R.id.lv);
 
         // 自定义适配器
         mleDeviceListAdapter = new LeDeviceListAdapter();
@@ -134,19 +154,104 @@ public class MainActivity extends BasActivity implements OnClickListener {
         });
     }
 
-    /**
-     * @param
-     * @return void
-     * @throws
-     * @Title: init
-     * @Description: TODO(初始化UI控件)
-     */
-    private void init() {
-        scan_btn = this.findViewById(R.id.scan_dev_btn);
-        scan_btn.setOnClickListener(this);
-        listView = this.findViewById(R.id.lv);
-        mHandler = new Handler();
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (MY_PERMISSIONS_REQUEST_LOCATION_ACCESS == requestCode) {
+            // If request is cancelled, the result arrays are empty.
+            if (grantResults.length > 0 && grantResults[0] == PERMISSION_GRANTED) {
+                delayShowView();
+                return;
+            }
+
+            if (grantResults.length > 0 && grantResults[0] == PERMISSION_DENIED) {
+                boolean showRationale = ActivityCompat.shouldShowRequestPermissionRationale(this, permissions[0]);
+                if (!showRationale) {
+                    // user also CHECKED "never ask again"
+                    // you can either enable some fall back,
+                    // disable features of your app
+                    // or open another dialog explaining
+                    // again the permission and directing to
+                    // the app setting
+                    AlertDialog alertDialog = new AlertDialog.Builder(this)
+                            .setIcon(R.mipmap.ic_launcher)
+                            .setTitle("请开启定位权限")
+                            .setPositiveButton(R.string.ok, (dialog, which) -> initPermissions())
+                            .create();
+                    alertDialog.setCancelable(false);
+                    alertDialog.show();
+                    return;
+                }
+            }
+            finish();
+        }
     }
+
+    /**
+     * 权限申请
+     */
+    private void initPermissions() {
+        int value = ContextCompat.checkSelfPermission(this, Manifest.permission_group.LOCATION);
+        if (PERMISSION_GRANTED == value) {
+            delayShowView();
+            return;
+        }
+        // 获取wifi连接需要定位权限, 没有获取权限
+        ActivityCompat.requestPermissions(this, new String[]{
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.ACCESS_WIFI_STATE,
+        }, MY_PERMISSIONS_REQUEST_LOCATION_ACCESS);
+    }
+
+    // 判断GPS是否开启，GPS或者AGPS开启一个就认为是开启的
+    public static boolean isOpenGPS(final Context context) {
+        LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+        boolean gps = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        boolean network = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+        return gps || network;
+    }
+
+    private void onHasPermission() {
+
+        // 初始化蓝牙
+        init_ble();
+
+        // 设置回调
+        setScanCallBack();
+
+        scan_flag = true;
+
+        // 淡入淡出
+        View cover = findViewById(R.id.image_cover);
+        cover.animate().alpha(0f).setDuration(500).setListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+
+            }
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                cover.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                cover.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+            }
+        });
+    }
+
+
+    private void delayShowView() {
+        long delay = (System.currentTimeMillis() - mCreateTime) > 1000 ? 0 : 1000;
+        UIHandler.postDelayed(this::onHasPermission, delay);
+    }
+
 
     /**
      * @param
@@ -172,6 +277,7 @@ public class MainActivity extends BasActivity implements OnClickListener {
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
         }
     }
+
 
     /*
      * 按钮响应事件
@@ -203,6 +309,7 @@ public class MainActivity extends BasActivity implements OnClickListener {
         }
     }
 
+
     /**
      * @param enable (扫描使能，true:扫描开始,false:扫描停止)
      * @return void
@@ -222,7 +329,7 @@ public class MainActivity extends BasActivity implements OnClickListener {
 
         if (enable) {
             // Stops scanning after a pre-defined scan period.
-            mHandler.postDelayed(() -> {
+            UIHandler.postDelayed(() -> {
                 mScanning = false;
                 scan_flag = true;
                 scan_btn.setText("扫描设备");
@@ -244,6 +351,7 @@ public class MainActivity extends BasActivity implements OnClickListener {
             scan_flag = true;
         }
     }
+
 
     private void setScanCallBack() {
         mScanCallback = new ScanCallback() {
@@ -277,6 +385,7 @@ public class MainActivity extends BasActivity implements OnClickListener {
             }
         };
     }
+
 
     /**
      * @author
@@ -337,10 +446,10 @@ public class MainActivity extends BasActivity implements OnClickListener {
         public View getView(int i, View view, ViewGroup viewGroup) {
 
             // General ListView optimization code.
-            // 加载listview每一项的视图
+            // 加载list view每一项的视图
             view = getLayoutInflater().inflate(R.layout.listitem, null);
 
-            // 初始化三个textview显示蓝牙信息
+            // 初始化三个text view显示蓝牙信息
             TextView deviceAddress = view.findViewById(R.id.tv_deviceAddr);
             TextView deviceName = view.findViewById(R.id.tv_deviceName);
             TextView rssi = view.findViewById(R.id.tv_rssi);
@@ -351,27 +460,5 @@ public class MainActivity extends BasActivity implements OnClickListener {
             rssi.setText("" + rssis.get(i));
             return view;
         }
-    }
-
-    /**
-     * 权限申请
-     */
-    private void initPermissions() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission_group.LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // 获取wifi连接需要定位权限,没有获取权限
-            ActivityCompat.requestPermissions((Activity) this, new String[]{
-                    Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.ACCESS_COARSE_LOCATION,
-                    Manifest.permission.ACCESS_WIFI_STATE,
-            }, 1);
-        }
-    }
-
-    // 判断GPS是否开启，GPS或者AGPS开启一个就认为是开启的
-    public static boolean isOpenGPS(final Context context) {
-        LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
-        boolean gps = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-        boolean network = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-        return gps || network;
     }
 }
