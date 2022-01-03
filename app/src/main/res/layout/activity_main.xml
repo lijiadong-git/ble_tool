@@ -4,14 +4,17 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-   <Button 
+   <TextView
+       android:id="@+id/scan_dev_btn"
        android:layout_width="match_parent"
-       android:layout_height="wrap_content"
-       android:layout_marginLeft="20dip"
-       android:layout_marginRight="20dip"
+       android:layout_height="50dp"
+       android:layout_marginHorizontal="20dp"
        android:layout_marginTop="30dip"
+       android:gravity="center"
+       android:textSize="17sp"
+       android:textStyle="bold"
        android:text="扫描设备"
-       android:id="@+id/scan_dev_btn" />
+       android:background="@drawable/bg_button"/>
 
    <ListView
        android:id="@+id/lv"
@@ -23,10 +26,11 @@
        android:layout_marginBottom="50dip" />
 
    <androidx.appcompat.widget.AppCompatImageView
+       android:visibility="gone"
        android:id="@+id/image_cover"
        android:layout_width="match_parent"
        android:layout_height="match_parent"
-       android:background="@color/white"
+       android:background="#FFF"
        android:src="@drawable/bluetooth"/>
 
 </RelativeLayout>

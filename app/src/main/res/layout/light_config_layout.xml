@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingBottom="30dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:text="@string/brightness_title"
+        android:textSize="17sp"
+        android:textStyle="bold"
+        android:gravity="center"/>
+
+    <LinearLayout
+        android:id="@+id/mode_checker_layout"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:paddingHorizontal="20dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:textSize="14sp"
+            android:gravity="center_vertical"
+            android:text="@string/mode_select" />
+        <androidx.appcompat.widget.AppCompatSpinner
+            android:id="@+id/mode_checker"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_marginStart="5dp"
+            android:textAlignment="center"
+            android:entries="@array/light_mode"
+            android:background="@drawable/bg_button"
+            tools:ignore="RtlSymmetry" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/light_config_layout_day"
+        android:layout_width="match_parent"
+        android:layout_height="20dp"
+        android:paddingHorizontal="20dp"
+        android:layout_marginTop="20dp">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:textSize="14sp"
+            android:gravity="center_vertical"
+            android:text="@string/day_light" />
+
+        <com.sevenheaven.segmentcontrol.SegmentControl
+            android:id="@+id/segment_control_day"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_marginStart="5dp"
+            android:textSize="14sp"
+            app:block_direction="horizon"
+            app:selectedColor="#32ADFF"
+            app:normalColor="#FFFFFF"
+            app:cornerRadius="5dp"
+            app:separatorWidth="2dp"
+            app:boundWidth="2dp"
+            app:texts="50%|60%|70%|80%|90%|100%"
+            app:verticalGap="10dp"
+            app:horizonGap="10dp"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/light_config_layout_night"
+        android:layout_width="match_parent"
+        android:layout_height="20dp"
+        android:paddingHorizontal="20dp"
+        android:layout_marginTop="20dp">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:textSize="14sp"
+            android:gravity="center_vertical"
+            android:text="@string/night_light" />
+
+        <com.sevenheaven.segmentcontrol.SegmentControl
+            android:id="@+id/segment_control_night"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_marginStart="5dp"
+            android:textSize="14sp"
+            app:block_direction="horizon"
+            app:selectedColor="#32ADFF"
+            app:normalColor="#FFFFFF"
+            app:cornerRadius="5dp"
+            app:separatorWidth="2dp"
+            app:boundWidth="2dp"
+            app:texts="50%|60%|70%|80%|90%|100%"
+            app:verticalGap="10dp"
+            app:horizonGap="10dp"/>
+    </LinearLayout>
+
+</LinearLayout>

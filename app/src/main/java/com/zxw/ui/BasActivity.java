@@ -1,9 +1,9 @@
 package com.zxw.ui;
-
-import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -17,7 +17,7 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Calendar;
 
-public class BasActivity extends Activity {
+public class BasActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

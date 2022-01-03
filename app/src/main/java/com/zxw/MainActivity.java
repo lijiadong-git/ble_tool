@@ -60,7 +60,8 @@ public class MainActivity extends BasActivity implements OnClickListener {
     private long mCreateTime;
 
     // 扫描蓝牙按钮
-    private Button scan_btn;
+    private TextView scan_btn;
+
     // 蓝牙适配器
     private BluetoothAdapter mBluetoothAdapter;
 
